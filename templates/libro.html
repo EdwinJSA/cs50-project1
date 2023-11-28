@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
+      crossorigin="anonymous"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Noto+Sans+Tangsa:wght@500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    rel="stylesheet"
+  />
+    <link rel="stylesheet" href="../static/CSS/style.css" />
+    <title>{% block title %}{% endblock %}</title>
+  </head>
+
+  <body>
+    <nav>
+        <div class="container-fluid">
+          <div><a href="/"> <img src="../static/home.png" alt="" height="30px"></a></div>
+          <div><a href="/logout"> <img src="../static/out.png" alt="" height="30px"></a></div>
+        </div>
+    </nav>
+
+    <div class="container">
+      <div id="bookCard">
+        <image id="imagenlibro" src="{{book['image']}}" />
+        <div>
+          <p class="font-bold m-3">Titulo del libro: {{book['title']}}</p>
+          <p class="font-bold m-3">Autor del libro: {{book['autor']}}</p>
+          <p class="font-bold m-3">Año de publicación: {{book['year']}}</p>
+          <p class="font-bold m-3">Contador de reviews: {{book['review_count']}}</p>
+          <p class="font-bold m-3">Promedio de puntajes: {{book['average_score']}}</p>
+        </div>
+        <div class="card-footer" id="PuntuarElLibro">
+          <form action="/libro?isbn={{book['isbn']}}" method="post">
+            <p id="info" class="float-left font-bold text-pink-800">
+              Puntuar
+            </p>
+            <div class="input-group" id="puntuarLibro">
+              <input type="number" id="rating" name="rating" class="rating" min=1 max=5 placeholder="1-5">
+              <input type="text" name="comentario"/ id="comentarioEspacio" placeholder="Escribe tu Comentario">
+              <button type="submit" id="comentarioEspacio">Enviar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      <div class="ex-basic-2" id="PuntuacionesDeLibros">
+        <div class="container">
+          <div class="col-lg-12">
+            {% for comentario in book['comentarios'] %}
+            <div class="card-footer card-comments">
+              <div class="card-comment">
+                {% if comentario[6] == iduser %}
+                <div class="container">
+                  <div class="row">
+                    <div class="col-lg-12 text-align-center">
+                      <div class="d-flex align-items-end">
+                        <span id="usuario" class="text-muted m-3">{{comentario['userbro']}}</span>
+                        <span class="text-muted m-3">Calificacion: {{comentario['rating']}} <img src="../static/estrella.png" alt="" height="30px"></span>
+                        <span class="text-muted m-3">{{comentario['comentario']}}</span>
+                        <span class="text-muted m-3 float-right">{{comentario['fecha']}}</span>
+                        <button id="lapiz" class="link-muted" data-bs-toggle="modal" data-bs-target="#exampleModalCenter" onclick="$('#comentario').val('{{comentario}}')">
+                          <img src="../static/editar.png" alt="" height="30px">
+                        </button>
+                        <a href="/eliminar_comentario?id={{comentario[0]}}&isbn={{book['isbn']}}" class="link-muted" id="trash">
+                          <img src="../static/eliminar.png" alt="" height="30px">
+                        </a>
+                      </div>
+                      <div class="container-fluid" id="comentario"> 
+                      </div>
+                    </div>
+                  </div>
+                </div>
+      
+
+
+
+                <!--ESTE ES EL DIALOG-->
+                <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLongTitle">
+                          Editar Comentario
+                        </h5>
+                      </div>
+                      <div class="modal-body">
+                        <form method="post" action="/actualizar_comentario?id={{comentario[0]}}&isbn={{book['isbn']}}">
+                          <div class="form-group">
+                            <textarea id="comentario" name="comentario" class="form-control" value="{{comentario['comentario']}}" id="message-text" Required
+                            ></textarea>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary btn-lg btn-block"> Actualizar </button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% endif %}
+      
+                
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

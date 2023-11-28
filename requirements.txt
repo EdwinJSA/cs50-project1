@@ -1,0 +1,9 @@
+flask
+flask_session
+sqlalchemy
+sqlalchemy-orm
+psycopg2
+helpers
+fuzzywuzzy
+python-dotenv
+requests
