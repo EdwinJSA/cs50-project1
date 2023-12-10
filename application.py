@@ -9,17 +9,19 @@ from psycopg2 import paramstyle
 from werkzeug.security import check_password_hash, generate_password_hash
 from tempfile import mkdtemp
 from helpers import login_required
+from dotenv import load_dotenv
 
 from fuzzywuzzy import *
 
 
 app = Flask(__name__)
-x = datetime.datetime.now()
-# Check for environment variable
+x = datetime.datetime.now() 
+print(os.getenv("DATABASE_URL"))
+
 if not os.getenv("DATABASE_URL"):
     raise RuntimeError("DATABASE_URL is not set")
 
-# Configure session to use filesystem
+
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
@@ -27,7 +29,6 @@ app.config["SESSION_FILE_DIR"] = mkdtemp()
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Set up database
 engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
 
@@ -44,7 +45,6 @@ def register():
         user = request.form.get('usuario')
         password = request.form.get('contraseña')
         confirmacion = request.form.get('confirmacion')
-        # print(usuario, contraseña, confirmacion)
         if not user:
             flash("Rellena el campo 'Usuario'")
             return redirect('register')
@@ -116,7 +116,6 @@ def libro():
         fecha = x.strftime("%I") + ':' + x.strftime("%M") + \
             " " + x.strftime("%A")
 
-        # check if user already commented
         query = text(
             "SELECT * FROM comentarios WHERE userId = :userId AND bookId = :bookId")
         user = db.execute(query, {"userId": session["user_id"], "bookId": id}).rowcount
@@ -145,8 +144,7 @@ def libro():
     query = text("SELECT * FROM books WHERE isbn = :isbn")
     book = db.execute(query, {"isbn": id}).fetchone()
 
-    #query comentarios and join with users
-    query = text("SELECT * FROM comentarios JOIN users ON comentarios.userId = users.id WHERE bookId = :isbn")
+    query = text("SELECT * FROM comentarios JOIN users ON comentarios.userid = users.id WHERE bookId = :isbn")
     comentarios = db.execute(query, {"isbn": id}).fetchall()
 
     response = requests.get("https://www.googleapis.com/books/v1/volumes?q=isbn:" + id).json()
@@ -168,7 +166,6 @@ def libro():
         "average_score": float(res[1]) if res[1] else 0
     }
 
-    # get user id from each comment 
     return render_template('libro.html', book=book, iduser=session["user_id"])
 
 @app.route("/eliminar_comentario", methods=["GET"])
@@ -201,7 +198,6 @@ def login():
     if request.method == "POST":
         usuario = request.form.get('usuario')
         password = request.form.get('password1')
-        # print(usuario, contraseña, confirmacion)
         if not usuario:
             flash("Rellena el campo 'Usuario'")
             return redirect('login')
@@ -246,7 +242,6 @@ def book_api(isbn):
             "average_score": response['items'][0]['volumeInfo']['averageRating']
         })
 
-    # fetch from database
     res = db.execute("SELECT COUNT(*), AVG(rating) FROM comentarios WHERE bookId = :isbn", {"isbn": isbn}).fetchone()
     print(res)
     return jsonify({
